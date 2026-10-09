@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ElevenLabs Voice Studio — AI Speech Narration</title>
+  <meta name="description" content="Professional AI narration interface powered by ElevenLabs Text-to-Speech models. Customize voice models, stability, speed and visualize real-time audio.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Background Glow & Particles -->
+  <div class="ambient-glow glow-top"></div>
+  <div class="ambient-glow glow-bottom"></div>
+
+  <div class="app-layout">
+    <!-- Header -->
+    <header class="app-header">
+      <div class="logo-area">
+        <div class="logo-badge">
+          <i data-lucide="sparkles" class="logo-icon"></i>
+        </div>
+        <div class="logo-text">
+          <span class="brand-title">ElevenLabs</span>
+          <span class="brand-subtitle">Voice Synthesizer Studio</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <!-- API Key Status Badge -->
+        <button id="apiKeyToggleBtn" class="api-key-btn" title="Configure ElevenLabs API Key">
+          <i data-lucide="key" class="btn-icon"></i>
+          <span id="apiKeyStatusLabel">Set API Key</span>
+          <span class="status-indicator" id="apiKeyStatusDot"></span>
+        </button>
+
+        <!-- Demo Mode Toggle -->
+        <div class="demo-toggle-wrapper" title="Toggle Demo Simulation Mode without spending credits">
+          <label class="switch-label" for="demoModeCheckbox">
+            <span>Demo Mode</span>
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="demoModeCheckbox">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content Grid -->
+    <main class="main-container">
+      <!-- Left Column: Input Studio & Primary Controls -->
+      <section class="studio-card main-workspace">
+        <div class="card-header">
+          <div class="header-title">
+            <i data-lucide="file-text" class="section-icon"></i>
+            <h2>Narration Script</h2>
+          </div>
+          
+          <div class="preset-chips-container">
+            <span class="chips-label">Quick Prompts:</span>
+            <button class="chip" data-sample="audiobook">Story</button>
+            <button class="chip" data-sample="documentary">Nature Doc</button>
+            <button class="chip" data-sample="product">Tech Ad</button>
+            <button class="chip" data-sample="quotes">Inspirational</button>
+          </div>
+        </div>
+
+        <!-- Text Input Field -->
+        <div class="text-area-wrapper">
+          <textarea 
+            id="textInput" 
+            placeholder="Type or paste your narrative script here... Select your model below and click 'Narrate with ElevenLabs' to hear human-like voice synthesis."
+            rows="7"
+            maxlength="5000"
+          ></textarea>
+          
+          <div class="textarea-footer">
+            <div class="text-stats">
+              <span id="charCount">0</span> / 5,000 characters
+              <span class="stat-divider">•</span>
+              <span id="wordCount">0</span> words
+              <span class="stat-divider">•</span>
+              <span id="readTime">0 min read</span>
+            </div>
+            <button id="clearTextBtn" class="icon-btn-text" title="Clear text">
+              <i data-lucide="trash-2"></i> Clear
+            </button>
+          </div>
+        </div>
+
+        <!-- Model & Voice Selectors Bar -->
+        <div class="selectors-grid">
+          <!-- ElevenLabs Model Selection -->
+          <div class="form-group">
+            <div class="label-with-hint">
+              <label for="modelSelect">
+                <i data-lucide="cpu"></i> ElevenLabs Model
+              </label>
+              <span class="badge-tag">Dropdown</span>
+            </div>
+            <div class="custom-select-wrapper">
+              <select id="modelSelect" class="studio-select">
+                <option value="eleven_multilingual_v2" selected>
+                  Eleven Multilingual v2 (Lifelike & Rich, 29 Languages)
+                </option>
+                <option value="eleven_flash_v2_5">
+                  Eleven Flash v2.5 (Ultra Fast, Lowest Latency ~75ms)
+                </option>
+                <option value="eleven_turbo_v2_5">
+                  Eleven Turbo v2.5 (High Quality, Low Latency)
+                </option>
+                <option value="eleven_flash_v2">
+                  Eleven Flash v2 (Super-fast Multilingual)
+                </option>
+                <option value="eleven_turbo_v2">
+                  Eleven Turbo v2 (English Fast Performance)
+                </option>
+                <option value="eleven_monolingual_v1">
+                  Eleven English v1 (Classic Narration Model)
+                </option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+            <p class="field-hint" id="modelDescription">
+              The flagship multilingual speech model with human-grade prosody and emotional depth.
+            </p>
+          </div>
+
+          <!-- ElevenLabs Voice Selection -->
+          <div class="form-group">
+            <div class="label-with-hint">
+              <label for="voiceSelect">
+                <i data-lucide="mic-2"></i> Speaker Voice
+              </label>
+              <button id="refreshVoicesBtn" class="refresh-link" title="Fetch custom voices from your account">
+                <i data-lucide="refresh-cw"></i> Sync
+              </button>
+            </div>
+            <div class="custom-select-wrapper">
+              <select id="voiceSelect" class="studio-select">
+                <option value="JBFqnCBsd6RMkjVDRZzb" selected>George (Warm, Captivating Storyteller - Male)</option>
+                <option value="EXAVITQu4vr4xnSDxMaL">Sarah (Mature, Reassuring, Confident - Female)</option>
+                <option value="nPczCjzI2devNBz1zQrb">Brian (Deep, Resonant and Comforting - Male)</option>
+                <option value="pFZP5JQG7iQjIQuC4Bku">Lily (Velvety Actress - Female)</option>
+                <option value="pNInz6obpgDQGcFmaJgB">Adam (Dominant, Firm, Narrative - Male)</option>
+                <option value="Xb7hH8MSUJpSbSDYk0k2">Alice (Clear, Engaging Educator - Female)</option>
+                <option value="CwhRBWXzGAHq8TQ4Fs17">Roger (Laid-Back, Casual, Resonant - Male)</option>
+                <option value="cgSgspJ2msm6clMCkdW9">Jessica (Playful, Bright, Warm - Female)</option>
+                <option value="bIHbv24MWmeRgasZH58o">Will (Relaxed Optimist - Male)</option>
+                <option value="IKne3meq5aSn9XLyUdCD">Charlie (Deep, Confident, Energetic - Male)</option>
+              </select>
+              <i data-lucide="chevron-down" class="select-chevron"></i>
+            </div>
+            <p class="field-hint" id="voiceDescription">
+              Default Voice: George (Warm, Storyteller). Click 'Sync' to refresh voices from your ElevenLabs account.
+            </p>
+          </div>
+        </div>
+
+        <!-- Primary Action Play Button -->
+        <div class="action-bar">
+          <button id="generateBtn" class="primary-generate-btn">
+            <div class="btn-shine"></div>
+            <div class="btn-content">
+              <div class="btn-icon-wrapper" id="playBtnIconWrap">
+                <i data-lucide="play" id="mainPlayIcon"></i>
+                <div class="spinner-ring" id="btnSpinner" style="display: none;"></div>
+              </div>
+              <div class="btn-text-group">
+                <span class="btn-main-title" id="generateBtnLabel">Start Narration</span>
+                <span class="btn-sub-title" id="generateBtnSub">Generate &amp; Play Speech (Ctrl + Enter)</span>
+              </div>
+            </div>
+          </button>
+
+          <button id="stopAudioBtn" class="secondary-btn" title="Stop current narration" disabled>
+            <i data-lucide="square"></i>
+            <span>Stop</span>
+          </button>
+        </div>
+
+        <!-- Audio Studio Deck (Active Playback & Visualizer) -->
+        <div class="audio-deck-panel" id="audioDeck">
+          <div class="deck-header">
+            <div class="deck-status">
+              <span class="pulse-indicator" id="playbackPulse"></span>
+              <span id="audioStatusText">Ready to narrate</span>
+            </div>
+            <div class="deck-actions">
+              <button id="downloadAudioBtn" class="action-pill-btn" title="Download Audio File (.mp3)" disabled>
+                <i data-lucide="download"></i> Download MP3
+              </button>
+            </div>
+          </div>
+
+          <!-- Real-Time Waveform Visualizer Canvas -->
+          <div class="canvas-container">
+            <canvas id="waveformCanvas" width="800" height="110"></canvas>
+            <div class="canvas-overlay-guide" id="canvasPlaceholderText">
+              <span>Waveform visualizer displays here during playback</span>
+            </div>
+          </div>
+
+          <!-- Custom Audio Controls Bar -->
+          <div class="custom-player">
+            <button id="togglePlayPauseBtn" class="player-icon-btn" disabled title="Play/Pause">
+              <i data-lucide="play" id="playerPlayPauseIcon"></i>
+            </button>
+
+            <span class="time-display" id="currentTimeLabel">0:00</span>
+            
+            <div class="seek-bar-container">
+              <input type="range" id="audioSeekBar" min="0" max="100" value="0" step="0.1" disabled>
+              <div class="seek-progress" id="seekProgressBar"></div>
+            </div>
+
+            <span class="time-display" id="totalDurationLabel">0:00</span>
+
+            <div class="volume-control">
+              <button id="muteBtn" class="player-icon-btn" title="Mute/Unmute">
+                <i data-lucide="volume-2" id="volumeIcon"></i>
+              </button>
+              <input type="range" id="volumeSlider" min="0" max="1" step="0.05" value="1" title="Volume">
+            </div>
+          </div>
+
+          <!-- Hidden native audio element -->
+          <audio id="nativeAudioElement" preload="metadata"></audio>
+        </div>
+      </section>
+
+      <!-- Right Column: Voice Settings & History Sidebar -->
+      <aside class="studio-sidebar">
+        <!-- Voice Fine-Tuning Card -->
+        <section class="studio-card settings-card">
+          <div class="card-header">
+            <div class="header-title">
+              <i data-lucide="sliders" class="section-icon"></i>
+              <h3>Voice Parameters</h3>
+            </div>
+            <button id="resetSettingsBtn" class="reset-link" title="Reset to ElevenLabs defaults">Reset</button>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="slider-title">Stability</span>
+              <span class="slider-val" id="stabilityVal">0.50</span>
+            </div>
+            <input type="range" id="stabilitySlider" min="0" max="1" step="0.05" value="0.5">
+            <div class="slider-labels">
+              <span>More Variable</span>
+              <span>More Stable</span>
+            </div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="slider-title">Clarity / Similarity</span>
+              <span class="slider-val" id="similarityVal">0.75</span>
+            </div>
+            <input type="range" id="similaritySlider" min="0" max="1" step="0.05" value="0.75">
+            <div class="slider-labels">
+              <span>Low</span>
+              <span>High Clarity</span>
+            </div>
+          </div>
+
+          <div class="slider-group">
+            <div class="slider-header">
+              <span class="slider-title">Style Exaggeration</span>
+              <span class="slider-val" id="styleVal">0.00</span>
+            </div>
+            <input type="range" id="styleSlider" min="0" max="1" step="0.05" value="0">
+            <div class="slider-labels">
+              <span>Natural</span>
+              <span>Exaggerated</span>
+            </div>
+          </div>
+
+          <div class="checkbox-setting">
+            <label class="custom-checkbox" for="speakerBoostCheck">
+              <input type="checkbox" id="speakerBoostCheck" checked>
+              <span class="checkmark"></span>
+              <span class="checkbox-text">Speaker Boost (Enhance presence)</span>
+            </label>
+          </div>
+        </section>
+
+        <!-- Generation History Card -->
+        <section class="studio-card history-card">
+          <div class="card-header">
+            <div class="header-title">
+              <i data-lucide="history" class="section-icon"></i>
+              <h3>Recent Narrations</h3>
+            </div>
+            <button id="clearHistoryBtn" class="reset-link" title="Clear history">Clear</button>
+          </div>
+
+          <div class="history-list" id="historyList">
+            <!-- Dynamically populated or empty placeholder -->
+            <div class="history-empty" id="historyEmptyState">
+              <i data-lucide="headphones" class="empty-icon"></i>
+              <p>Your generated voice clips will appear here for fast replay and download.</p>
+            </div>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <!-- Footer -->
+    <footer class="app-footer">
+      <p>Powered by <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer">ElevenLabs API</a> • Next-Gen AI Audio Narration</p>
+    </footer>
+  </div>
+
+  <!-- API Key Modal -->
+  <div class="modal-backdrop" id="apiKeyModal" style="display: none;">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <div class="modal-icon-badge">
+            <i data-lucide="key"></i>
+          </div>
+          <div>
+            <h3>ElevenLabs API Key</h3>
+            <p>Your key is stored locally in your browser and never leaves your device.</p>
+          </div>
+        </div>
+        <button id="closeModalBtn" class="close-btn" title="Close">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <label for="apiKeyInput" class="modal-field-label">API Key (xi-api-key)</label>
+        <div class="key-input-wrapper">
+          <input 
+            type="password" 
+            id="apiKeyInput" 
+            placeholder="sk_..." 
+            autocomplete="off"
+            spellcheck="false"
+          >
+          <button id="toggleKeyVisibilityBtn" class="icon-toggle-btn" title="Show/Hide Key">
+            <i data-lucide="eye" id="eyeIcon"></i>
+          </button>
+        </div>
+
+        <div class="api-help-note">
+          <i data-lucide="info"></i>
+          <span>Don't have a key? Grab a free API key at <a href="https://elevenlabs.io" target="_blank" rel="noopener noreferrer">elevenlabs.io</a> (Profile → API Keys).</span>
+        </div>
+
+        <div class="modal-feedback" id="apiKeyFeedback"></div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="testApiKeyBtn" class="secondary-btn">
+          <i data-lucide="check-circle-2"></i> Verify Key
+        </button>
+        <div class="modal-btn-right">
+          <button id="removeKeyBtn" class="text-danger-btn">Remove</button>
+          <button id="saveApiKeyBtn" class="primary-btn">Save Key</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
